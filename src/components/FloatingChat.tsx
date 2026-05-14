@@ -3,10 +3,15 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Sparkles, Send, Bot, Maximize2 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const isChatPage = pathname === '/chat';
+
+  if (isChatPage) return null;
 
   return (
     <>
@@ -16,7 +21,7 @@ export default function FloatingChat() {
             initial={{ opacity: 0, scale: 0.9, y: 20, transformOrigin: 'bottom right' }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed bottom-24 right-6 w-[380px] h-[520px] max-w-[calc(100vw-48px)] max-h-[calc(100vh-120px)] z-[2000] flex flex-col glass-card border-blue-500/20 shadow-2xl overflow-hidden"
+            className="fixed bottom-24 right-6 w-[380px] h-[520px] max-w-[calc(100vw-48px)] max-h-[calc(100vh-120px)] z-[2000] flex flex-col bg-slate-150/10 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
           >
             {/* Header */}
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-blue-600/10">
@@ -29,18 +34,18 @@ export default function FloatingChat() {
                   <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest animate-pulse">Online</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Link 
-                  href="/chat" 
+              <div className="flex items-center gap-1 cursor-pointer">
+                <Link
+                  href="/chat"
                   onClick={() => setIsOpen(false)}
-                  className="p-2 hover:bg-white/5 rounded-xl text-slate-400 transition-colors"
+                  className="p-2 hover:bg-white/5 rounded-xl text-slate-400 transition-colors cursor-pointer"
                   title="Full screen chat"
                 >
                   <Maximize2 size={16} />
                 </Link>
-                <button 
+                <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 hover:bg-white/5 rounded-xl text-slate-400 transition-colors"
+                  className="p-2 hover:bg-white/5 rounded-xl text-slate-400 transition-colors cursor-pointer"
                 >
                   <X size={18} />
                 </button>
@@ -62,11 +67,11 @@ export default function FloatingChat() {
 
               <div className="flex flex-wrap gap-2 pt-2">
                 {['Will it rain soon?', 'What should I wear?', 'Weekend forecast'].map(q => (
-                  <Link 
+                  <Link
                     key={q}
                     href={`/chat?q=${encodeURIComponent(q)}`}
                     onClick={() => setIsOpen(false)}
-                    className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition-all"
+                    className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition-all cursor-pointer"
                   >
                     {q}
                   </Link>
@@ -76,19 +81,19 @@ export default function FloatingChat() {
 
             {/* Input Area */}
             <div className="p-4 border-t border-white/5 bg-slate-900/50">
-               <Link href="/chat" onClick={() => setIsOpen(false)} className="block">
-                  <div className="relative">
-                    <input 
-                      type="text" 
-                      readOnly
-                      placeholder="Ask SkyCast AI..." 
-                      className="w-full bg-white/5 border border-white/5 rounded-xl py-3 pl-4 pr-10 text-sm focus:outline-none cursor-pointer"
-                    />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-blue-600 text-white shadow-lg">
-                      <Send size={14} />
-                    </div>
+              <Link href="/chat" onClick={() => setIsOpen(false)} className="block cursor-pointer">
+                <div className="relative">
+                  <input
+                    type="text"
+                    readOnly
+                    placeholder="Ask SkyCast AI..."
+                    className="w-full bg-white/5 border border-white/5 rounded-xl py-3 pl-4 pr-10 text-sm focus:outline-none cursor-pointer"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-blue-600 text-white shadow-lg cursor-pointer">
+                    <Send size={14} />
                   </div>
-               </Link>
+                </div>
+              </Link>
             </div>
           </motion.div>
         )}
@@ -98,7 +103,7 @@ export default function FloatingChat() {
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shadow-2xl shadow-blue-600/40 z-[2001] border border-blue-400/30"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shadow-2xl shadow-blue-600/40 z-[2001] border border-blue-400/30 cursor-pointer"
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
@@ -108,10 +113,10 @@ export default function FloatingChat() {
           ) : (
             <motion.div key="chat" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}>
               <MessageCircle size={28} className="text-white" />
-              <motion.div 
-                animate={{ scale: [1, 1.2, 1] }} 
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-blue-600 flex items-center justify-center"
+                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center"
               >
                 <div className="w-1 h-1 bg-white rounded-full" />
               </motion.div>

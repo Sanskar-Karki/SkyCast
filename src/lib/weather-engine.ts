@@ -107,7 +107,7 @@ export async function fetchWeatherAggregation(lat: number, lon: number): Promise
 }
 
 async function fetchOpenMeteoFull(lat: number, lon: number) {
-  const res = await axios.get(`${OPEN_METEO_URL}?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,precipitation_probability,weathercode,windspeed_10m,relativehumidity_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode,sunrise,sunset&timezone=auto&forecast_days=7`);
+  const res = await axios.get(`${OPEN_METEO_URL}?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,precipitation_probability,weathercode,windspeed_10m,relativehumidity_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode,sunrise,sunset&timezone=auto&forecast_days=14`);
   const d = res.data;
 
   const nowHour = new Date().getHours();
@@ -166,7 +166,11 @@ async function fetchOpenMeteoFull(lat: number, lon: number) {
 async function fetchOpenWeather(lat: number, lon: number): Promise<NormalizedWeather> {
   const apiKey = process.env.NEXT_PUBLIC_OPENWEATHER_KEY;
   if (!apiKey || apiKey.includes('your_')) throw new Error('OpenWeather key missing');
-  const res = await axios.get(`${OPEN_WEATHER_MAP_URL}/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`);
+  
+  const res = await axios.get(`${OPEN_WEATHER_MAP_URL}/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`, {
+    timeout: 5000 // 5 second timeout
+  });
+  
   return {
     temp: res.data.main.temp,
     feelsLike: res.data.main.feels_like,
@@ -183,7 +187,11 @@ async function fetchOpenWeather(lat: number, lon: number): Promise<NormalizedWea
 async function fetchWeatherApi(lat: number, lon: number): Promise<NormalizedWeather> {
   const apiKey = process.env.NEXT_PUBLIC_WEATHERAPI_KEY;
   if (!apiKey || apiKey.includes('your_')) throw new Error('WeatherAPI key missing');
-  const res = await axios.get(`${WEATHER_API_URL}/current.json?key=${apiKey}&q=${lat},${lon}`);
+  
+  const res = await axios.get(`${WEATHER_API_URL}/current.json?key=${apiKey}&q=${lat},${lon}`, {
+    timeout: 5000 // 5 second timeout
+  });
+  
   return {
     temp: res.data.current.temp_c,
     feelsLike: res.data.current.feelslike_c,
@@ -196,3 +204,4 @@ async function fetchWeatherApi(lat: number, lon: number): Promise<NormalizedWeat
     timestamp: Date.now(),
   };
 }
+

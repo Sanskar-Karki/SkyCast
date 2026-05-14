@@ -122,33 +122,53 @@ export default function InteractiveMap({ lat, lon, onLocationSelect }: Interacti
     setMounted(true);
 
     return () => {
-      map.remove();
-      leafletMapRef.current = null;
+      if (leafletMapRef.current) {
+        try {
+          leafletMapRef.current.off();
+          leafletMapRef.current.remove();
+        } catch (e) {
+          console.error('Error removing map:', e);
+        }
+        leafletMapRef.current = null;
+      }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update marker when lat/lon changes
   useEffect(() => {
-    if (!leafletMapRef.current || !markerRef.current) return;
-    markerRef.current.setLatLng([lat, lon]);
-    leafletMapRef.current.setView([lat, lon], leafletMapRef.current.getZoom());
-  }, [lat, lon]);
+    if (!leafletMapRef.current || !markerRef.current || !mounted) return;
+    
+    try {
+      markerRef.current.setLatLng([lat, lon]);
+      // Use animate: true for smoother transitions, but wrap in try-catch
+      leafletMapRef.current.setView([lat, lon], leafletMapRef.current.getZoom(), {
+        animate: true,
+        duration: 0.5
+      });
+    } catch (e) {
+      console.warn('Map update skipped:', e);
+    }
+  }, [lat, lon, mounted]);
 
   // Swap OWM overlay layer when activeLayer changes
   useEffect(() => {
     if (!leafletMapRef.current || !mounted) return;
     if (!OWM_KEY || OWM_KEY.includes('your_')) return;
 
-    const L = require('leaflet');
+    try {
+      const L = require('leaflet');
 
-    if (overlayLayerRef.current) {
-      leafletMapRef.current.removeLayer(overlayLayerRef.current);
+      if (overlayLayerRef.current) {
+        leafletMapRef.current.removeLayer(overlayLayerRef.current);
+      }
+
+      const overlayUrl = `https://tile.openweathermap.org/map/${activeLayer}/{z}/{x}/{y}.png?appid=${OWM_KEY}`;
+      const newOverlay = L.tileLayer(overlayUrl, { opacity, maxZoom: 19 });
+      newOverlay.addTo(leafletMapRef.current);
+      overlayLayerRef.current = newOverlay;
+    } catch (e) {
+      console.warn('Layer update failed:', e);
     }
-
-    const overlayUrl = `https://tile.openweathermap.org/map/${activeLayer}/{z}/{x}/{y}.png?appid=${OWM_KEY}`;
-    const newOverlay = L.tileLayer(overlayUrl, { opacity, maxZoom: 19 });
-    newOverlay.addTo(leafletMapRef.current);
-    overlayLayerRef.current = newOverlay;
   }, [activeLayer, opacity, mounted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const activeLayerInfo = LAYERS.find((l) => l.id === activeLayer)!;
@@ -164,7 +184,7 @@ export default function InteractiveMap({ lat, lon, onLocationSelect }: Interacti
             key={layer.id}
             onClick={() => setActiveLayer(layer.id)}
             title={layer.description}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
               activeLayer === layer.id
                 ? 'text-white border-transparent shadow-lg scale-105'
                 : 'text-slate-400 border-white/10 hover:border-white/20 hover:text-white'
@@ -189,7 +209,7 @@ export default function InteractiveMap({ lat, lon, onLocationSelect }: Interacti
             step={0.05}
             value={opacity}
             onChange={(e) => setOpacity(parseFloat(e.target.value))}
-            className="w-24 accent-blue-500"
+            className="w-24 accent-blue-500 cursor-pointer"
           />
           <span className="text-xs font-mono text-slate-400 w-8">{Math.round(opacity * 100)}%</span>
         </div>
@@ -293,7 +313,7 @@ export default function InteractiveMap({ lat, lon, onLocationSelect }: Interacti
           </div>
           <button
             onClick={() => setShowLegend(false)}
-            className="text-slate-600 hover:text-slate-400 transition-colors ml-4"
+            className="text-slate-600 hover:text-slate-400 transition-colors ml-4 cursor-pointer"
           >
             ✕
           </button>
@@ -302,7 +322,7 @@ export default function InteractiveMap({ lat, lon, onLocationSelect }: Interacti
       {!showLegend && (
         <button
           onClick={() => setShowLegend(true)}
-          className="w-full py-2 text-xs text-slate-600 hover:text-slate-400 transition-colors border-t border-white/5"
+          className="w-full py-2 text-xs text-slate-600 hover:text-slate-400 transition-colors border-t border-white/5 cursor-pointer"
         >
           Show legend
         </button>
