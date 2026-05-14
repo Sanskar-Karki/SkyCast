@@ -1,0 +1,17 @@
+{
+  "name": "SkyCast AI",
+  "short_name": "SkyCast",
+  "description": "Precision AI-powered weather platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060c1a",
+  "theme_color": "#060c1a",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1163/1163706.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
